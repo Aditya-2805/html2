@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Strength Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white; 
+            margin: 0; 
+            padding: 0;
+        }
+        .container {
+            max-width: 600px; 
+            margin: 100px auto; 
+            padding: 30px; 
+            background: rgba(255, 255, 255, 0.9); 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center; 
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label {
+            font-weight: bold; 
+            display: block; 
+            margin: 10px 0 5px;
+        }
+        input, button {
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border: 1px solid #ccc; 
+            box-sizing: border-box; 
+        }
+        input:focus {
+            border-color: #6a11cb; 
+            outline: none; 
+        }
+        button {
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838; 
+        }
+        #result {
+            margin-top: 20px; 
+            color: #333; 
+            font-weight: bold;
+            text-align: center; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Network Strength Prediction</h1>
+    
+    <label>Location (auto-detected):</label>
+    <input type="text" id="location" placeholder="Fetching location..." readonly>
+
+    <label>Latency (ms):</label>
+    <input type="text" id="latency" placeholder="Measuring latency..." readonly>
+
+    <label>Downlink Speed (Mbps):</label>
+    <input type="text" id="downlink" placeholder="Fetching downlink speed..." readonly>
+
+    <label>Network Type:</label>
+    <input type="text" id="networkType" placeholder="Fetching network type..." readonly>
+
+    <button onclick="submitData()">Submit</button>
+    
+    <div id="result"></div>
+</div>
+
+<script>
+    // Function to measure network latency (ping to a known server)
+    function measureLatency() {
+        var startTime = new Date().getTime();
+        var image = new Image();
+        image.src = "https://www.google.com/images/phd/px.gif?t=" + startTime;  // A small image from Google
+
+        image.onload = function() {
+            var endTime = new Date().getTime();
+            var latency = endTime - startTime;
+            document.getElementById('latency').value = latency + " ms";
+        };
+
+        image.onerror = function() {
+            document.getElementById('latency').value = "Error measuring latency";
+        };
+    }
+
+    // Function to fetch user's location using the Geolocation API
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('location').value = position.coords.latitude + "," + position.coords.longitude;
+            });
+        } else {
+            document.getElementById('location').value = "Geolocation not supported";
+        }
+    }
+
+    // Function to fetch network information using the Network Information API
+    function getNetworkInfo() {
+        if ('connection' in navigator) {
+            var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            console.log('Network Connection Info:', connection);  // Log connection info for debugging
+
+            var downlinkSpeed = connection.downlink || "Unknown";
+            var networkType = connection.effectiveType || "Unknown";  // Use effectiveType for better compatibility
+
+            document.getElementById('downlink').value = downlinkSpeed + " Mbps";  // Using downlink speed for prediction
+            document.getElementById('networkType').value = networkType;  // Display network type
+        } else {
+            document.getElementById('downlink').value = "Network Information API not supported.";
+            document.getElementById('networkType').value = "Network Information API not supported.";
+        }
+    }
+
+    // Automatically fetch location, network info, and measure latency on page load
+    window.onload = function() {
+        getLocation();  // Fetch location
+        measureLatency();  // Measure latency
+        getNetworkInfo();  // Fetch network info
+    };
+
+    // Function to submit data to the backend
+    function submitData() {
+        var latency = document.getElementById('latency').value.split(" ")[0]; // Extract numerical value
+        var downlink = document.getElementById('downlink').value.split(" ")[0]; // Extract numerical value
+        var networkType = document.getElementById('networkType').value;
+        var location = document.getElementById('location').value;
+
+        fetch('/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'latency=' + latency + '&downlink=' + downlink + '&networkType=' + networkType + '&location=' + location,
+        })
+        .then(response => response.json())
+        .then(data => {
+            var resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Prediction: ' + data.prediction;
+        });
+    }
+</script>
+
+</body>
+</html>
