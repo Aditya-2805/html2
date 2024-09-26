@@ -26,7 +26,7 @@
     <input type="text" id="downlink" placeholder="Fetching download speed..." readonly>
 
     <label>Network Type:</label>
-    <input type="text" id="networkType" placeholder="Fetching network type..." readonly>
+    <input type="text" id="networkType" value="5G" readonly> <!-- Default set to 5G -->
 
     <label>Location (auto-detected):</label>
     <input type="text" id="location" placeholder="Fetching location..." readonly>
@@ -71,7 +71,7 @@
     function getNetworkInfo() {
         if ('connection' in navigator) {
             var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            var networkType = connection.effectiveType || "Unknown"; // Get the network type
+            var networkType = connection.effectiveType || "5G"; // Set default to 5G if unknown
             document.getElementById('networkType').value = networkType; // Store network type
         } else {
             document.getElementById('networkType').value = "Network Information API not supported.";
