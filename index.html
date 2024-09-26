@@ -67,17 +67,6 @@
         });
     }
 
-    // Function to fetch network information using the Network Information API
-    function getNetworkInfo() {
-        if ('connection' in navigator) {
-            var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            var networkType = connection.effectiveType || "5G"; // Set default to 5G if unknown
-            document.getElementById('networkType').value = networkType; // Store network type
-        } else {
-            document.getElementById('networkType').value = "Network Information API not supported.";
-        }
-    }
-
     // Function to fetch user's location using the Geolocation API
     function getLocation() {
         if (navigator.geolocation) {
@@ -89,11 +78,10 @@
         }
     }
 
-    // Automatically fetch location, network info, measure latency, and check download speed on page load
+    // Automatically fetch location, measure latency, and check download speed on page load
     window.onload = function() {
         measureLatency();  // Measure latency
         getDownloadSpeed();  // Run speed test
-        getNetworkInfo();  // Fetch network info
         getLocation();  // Fetch location
     };
 
@@ -101,7 +89,7 @@
     function submitData() {
         var latency = document.getElementById('latency').value;
         var downlink = document.getElementById('downlink').value;
-        var networkType = document.getElementById('networkType').value;
+        var networkType = document.getElementById('networkType').value; // Defaults to 5G
         var location = document.getElementById('location').value;
 
         fetch('/submit', {
